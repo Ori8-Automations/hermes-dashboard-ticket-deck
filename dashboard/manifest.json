@@ -1,0 +1,14 @@
+{
+  "name": "hermes-ticket-deck",
+  "label": "Tickets",
+  "description": "Read-only Zammad ticketing dashboard: sanitized ticket metadata, counts, and article text. No writes.",
+  "icon": "Tickets",
+  "version": "1.0.1",
+  "tab": {
+    "path": "/ticket-deck",
+    "position": "end"
+  },
+  "entry": "dist/index.js",
+  "css": "dist/style.css",
+  "api": "plugin_api.py"
+}

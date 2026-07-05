@@ -1,0 +1,35 @@
+name: hermes-ticket-deck
+version: "1.0.1"
+description: Read-only Hermes Dashboard for Zammad ticketing — sanitized metadata, counts, and article text.
+license: MIT
+manifest_version: 1
+# Set this after you create the GitHub repo:
+# homepage: https://github.com/<owner>/hermes-ticket-deck
+
+# Dashboard-only plugin; the extension lives in dashboard/.
+entry_points:
+  dashboard: dashboard/manifest.json
+
+# Honest declaration: unlike a purely local plugin, Ticket Deck makes outbound
+# network calls to your Zammad API and reads a token from an env file. It ships
+# no agent tools and performs no writes.
+permissions:
+  tools: false
+  network: true          # egress to ZAMMAD_BASE_URL (your Zammad REST API)
+  filesystem:
+    read:
+      - ${ZAMMAD_ENV_FILE}
+      - ${HERMES_HOME}/zammad.env
+    write: []
+
+metadata:
+  hermes:
+    category: operations
+    tags:
+      - dashboard
+      - zammad
+      - ticketing
+      - read-only
+    # Routes serve ticket content; protect the dashboard with an auth provider.
+    # Requires Hermes >= 0.18.0 for the mandatory non-loopback auth gate.
+    min_hermes_version: "0.18.0"

@@ -1,0 +1,114 @@
+/* Hermes Ticket Deck — scoped styles. Dark-mode first, light fallback. */
+
+.htd-root {
+  --htd-bg: #0e1116;
+  --htd-panel: #151a21;
+  --htd-panel-2: #1b2029;
+  --htd-border: #2a313c;
+  --htd-text: #e6e9ee;
+  --htd-muted: #9aa4b2;
+  --htd-accent: #5eead4;
+  --htd-accent-fg: #06231d;
+  --htd-warn: #f59e0b;
+  --htd-danger: #ef4444;
+  --htd-radius: 12px;
+
+  color: var(--htd-text);
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@media (prefers-color-scheme: light) {
+  .htd-root {
+    --htd-bg: #f6f7f9;
+    --htd-panel: #ffffff;
+    --htd-panel-2: #f0f2f5;
+    --htd-border: #dde1e7;
+    --htd-text: #1a1d23;
+    --htd-muted: #5b6572;
+    --htd-accent: #0d9488;
+    --htd-accent-fg: #ffffff;
+  }
+}
+
+.htd-root * { box-sizing: border-box; }
+.htd-muted { color: var(--htd-muted); }
+
+/* Header */
+.htd-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem;
+  padding: 1.1rem 1.25rem; border: 1px solid var(--htd-border); border-radius: var(--htd-radius); background: var(--htd-panel); }
+.htd-eyebrow { margin: 0; color: var(--htd-accent); text-transform: uppercase; letter-spacing: .14em; font-size: .7rem; font-weight: 800; }
+.htd-title { margin: .15rem 0 .35rem; font-size: 1.6rem; }
+.htd-actions { display: flex; flex-wrap: wrap; gap: .6rem; justify-content: flex-end; }
+
+.htd-btn { border: 1px solid var(--htd-border); background: var(--htd-panel-2); color: var(--htd-text);
+  padding: .5rem .9rem; border-radius: 999px; cursor: pointer; font: inherit; font-weight: 600; text-decoration: none; white-space: nowrap; }
+.htd-btn:hover { border-color: var(--htd-accent); }
+
+/* Status strip */
+.htd-status { display: flex; flex-wrap: wrap; gap: 1.25rem; color: var(--htd-muted); font-size: .86rem; padding: 0 .25rem; }
+.htd-status strong { color: var(--htd-text); }
+
+/* Metrics */
+.htd-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: .75rem; }
+.htd-metric { display: flex; flex-direction: column; gap: .2rem; padding: .9rem 1rem;
+  border: 1px solid var(--htd-border); border-radius: var(--htd-radius); background: var(--htd-panel); }
+.htd-metric-label { color: var(--htd-muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; }
+.htd-metric-value { font-size: 1.6rem; }
+
+/* Layout */
+.htd-layout { display: grid; grid-template-columns: minmax(14rem, 20rem) minmax(0, 1fr); gap: 1rem; align-items: start; }
+.htd-panel { padding: 1rem 1.1rem; border: 1px solid var(--htd-border); border-radius: var(--htd-radius); background: var(--htd-panel); }
+.htd-panel h2 { margin: 0 0 .75rem; font-size: 1rem; }
+.htd-panel-head { display: flex; align-items: center; justify-content: space-between; gap: .75rem; flex-wrap: wrap; margin-bottom: .75rem; }
+
+.htd-group-list { display: flex; flex-direction: column; gap: .4rem; }
+.htd-group { display: flex; align-items: center; justify-content: space-between; gap: .5rem;
+  border: 1px solid var(--htd-border); border-radius: 8px; background: var(--htd-panel-2); color: var(--htd-text);
+  padding: .45rem .65rem; cursor: pointer; font: inherit; }
+.htd-group:hover, .htd-group.is-active { border-color: var(--htd-accent); color: var(--htd-accent); }
+.htd-clear-group { margin-bottom: .5rem; border: 0; background: none; color: var(--htd-accent); cursor: pointer; font: inherit; padding: 0; }
+
+.htd-presets { display: flex; gap: .35rem; flex-wrap: wrap; }
+.htd-presets button { border: 1px solid var(--htd-border); border-radius: 999px; background: var(--htd-panel-2);
+  color: var(--htd-text); padding: .3rem .7rem; cursor: pointer; font: inherit; font-size: .82rem; }
+.htd-presets button:hover, .htd-presets button.is-active { border-color: var(--htd-accent); color: var(--htd-accent); }
+
+/* Ticket rows */
+.htd-ticket-list { display: flex; flex-direction: column; gap: .55rem; }
+.htd-ticket { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; width: 100%; text-align: left;
+  border: 1px solid var(--htd-border); border-radius: 10px; background: var(--htd-panel-2); color: inherit; cursor: pointer; font: inherit; padding: .75rem .85rem; }
+.htd-ticket:hover { border-color: var(--htd-accent); }
+.htd-ticket-title { display: flex; gap: .5rem; align-items: baseline; flex-wrap: wrap; }
+.htd-ticket-number { color: var(--htd-accent); font-size: .82rem; }
+.htd-ticket-meta { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: .3rem; color: var(--htd-muted); font-size: .8rem; }
+.htd-ticket-badges { display: flex; flex-direction: column; align-items: flex-end; gap: .3rem; }
+
+.htd-badge { font-size: .72rem; border: 1px solid var(--htd-border); border-radius: 999px; padding: .05rem .55rem;
+  color: var(--htd-muted); background: var(--htd-panel); white-space: nowrap; }
+.htd-badge.warn { color: var(--htd-warn); border-color: var(--htd-warn); }
+.htd-badge.danger { color: var(--htd-danger); border-color: var(--htd-danger); }
+
+.htd-error { padding: .7rem 1rem; border: 1px solid var(--htd-danger); border-radius: 10px;
+  color: var(--htd-danger); background: color-mix(in srgb, var(--htd-danger) 15%, transparent); }
+
+/* Detail */
+.htd-detail { padding: 1.2rem; border: 1px solid var(--htd-border); border-radius: var(--htd-radius); background: var(--htd-panel); }
+.htd-detail-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+.htd-detail-meta { display: flex; flex-wrap: wrap; gap: .5rem; margin: .75rem 0 1rem; }
+.htd-articles { display: flex; flex-direction: column; gap: .75rem; }
+.htd-article { border: 1px solid var(--htd-border); border-radius: 10px; background: var(--htd-panel-2); padding: .85rem 1rem; }
+.htd-article-meta { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; color: var(--htd-muted); font-size: .8rem; margin-bottom: .4rem; }
+.htd-article h3 { margin: .2rem 0 .5rem; font-size: .98rem; }
+.htd-article-body { white-space: pre-wrap; word-wrap: break-word; margin: 0; font-family: inherit; font-size: .9rem; line-height: 1.55; }
+
+.htd-footer { color: var(--htd-muted); font-size: .8rem; padding: .25rem; }
+
+@media (max-width: 900px) {
+  .htd-layout { grid-template-columns: 1fr; }
+  .htd-header { flex-direction: column; }
+}
