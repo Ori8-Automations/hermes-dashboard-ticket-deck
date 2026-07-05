@@ -1,59 +1,28 @@
-# Hermes Ticket Deck
+# Hermes Dashboard Ticket Deck
 
-A **read-only** [Hermes Agent](https://hermes-agent.nousresearch.com) Dashboard
-plugin for [Zammad](https://zammad.org) ticketing. It gives operators an
-in-dashboard view of ticket **counts, queues, and read-only ticket detail**
-without exposing the full Zammad UI — useful when you want visibility (e.g.
-alongside agent/automation work) but not another login surface or write access.
+Read-only Hermes Dashboard plugin for Zammad ticket visibility — counts, queues, and read-only ticket detail without exposing the full Zammad UI.
 
-> **Early / community package.** This is a small public-safe dashboard utility,
-> not an official Zammad client and not a replacement for Zammad permissions,
-> workflow, or audit controls. Review the security section before using it with
-> real tickets.
+> **Early / community package.** Ticket Deck is functional and tested, but the Hermes dashboard plugin API surface may change before a 1.0 release. Pin your version if you need stability.
 
-```
-Zammad REST API  →  Ticket Deck tab  →  counts · queues · read-only detail
-```
-
-> ⚠️ **This plugin serves ticket content (including article text, which may
-> contain customer PII).** Read the [Security & exposure](#security--exposure)
-> section before deploying. It is read-only, but read access still matters.
-
-<!-- Add a screenshot here once deployed, e.g.:
-![Ticket Deck](docs/screenshot.png)
--->
-
-## Features
-
-- **Tickets tab** in the Hermes Dashboard.
-- **Summary metrics**: open / unassigned / escalated / high-priority counts
-  (capped, reflecting what the configured token can see).
-- **Queues**: open-by-group breakdown; click a group to filter.
-- **Presets**: open / new / pending / high.
-- **Read-only ticket detail**: sanitized article text, newest last, capped in
-  count and length. Attachments are counted but never downloaded.
-- **Mock mode** (`ZAMMAD_MOCK=1`): canned tickets so you can try it (and run the
-  tests) with no live Zammad.
-- **Dark-mode first**, with a light fallback.
-- **Read-only and safe**: the Zammad token stays server-side and is never sent
-  to the browser; there are no write/delete/edit routes and no raw HTML.
+> ⚠️ **This plugin serves ticket content, including article text that may contain customer PII.** It is read-only, but read access still matters. Review the security section before using it with real tickets.
 
 ## Why this exists
 
-Hermes operators often need ticket context while reviewing agent work, triage
-queues, or operational reports. Opening the full ticketing system is sometimes
-too much surface area for a lightweight cockpit view. Ticket Deck gives a narrow,
-read-only window into Zammad: enough context to decide what needs attention,
-without exposing write buttons or downloading attachments.
+Zammad is the operational source of truth for many support workflows, but opening the full ticketing UI is not always the right shape for an operator cockpit, agent review, or lightweight Mission Control surface.
 
-## Requirements
+**Ticket visibility needs a narrow dashboard lane.** Ticket Deck gives Hermes operators a quick view of ticket load and ticket context:
 
-- **Hermes Agent ≥ 0.18.0** (for the mandatory dashboard auth gate — see below).
-- A reachable Zammad instance and an API token.
-- No build step, no npm dependencies (frontend uses the Hermes Plugin SDK); no
-  extra Python dependencies beyond what Hermes ships (FastAPI).
+```text
+Zammad REST API → Ticket Deck tab → counts · queues · read-only detail
+```
+
+**Read-only should mean read-only.** This plugin does not create tickets, update tickets, post notes, download attachments, trigger agents, or call arbitrary URLs. It reads from Zammad with a server-side token, returns a fixed allow-list of fields, and renders ticket/article text as React text nodes rather than raw HTML.
+
+**The full ticketing system remains the system of record.** Ticket Deck is a cockpit window, not a replacement for Zammad permissions, workflow, audit controls, or technician tooling. Any authenticated dashboard user sees what the configured Zammad token can see, so scope that token deliberately.
 
 ## Install
+
+Copy the plugin directory into your Hermes plugins path, enable it, and restart the dashboard:
 
 ```bash
 cp -r hermes-ticket-deck ~/.hermes/plugins/
@@ -61,10 +30,7 @@ hermes plugins enable hermes-ticket-deck
 hermes dashboard --host 127.0.0.1 --port 9119 --no-open
 ```
 
-> Copy the repo directory (the one with `plugin.yaml` and `dashboard/`) to
-> `~/.hermes/plugins/hermes-ticket-deck`. The `tests/` folder is harmless.
-
-**Manual config fallback** (if you manage plugins via config):
+Manual config fallback:
 
 ```yaml
 plugins:
@@ -72,80 +38,105 @@ plugins:
     - hermes-ticket-deck
 ```
 
-then restart the dashboard (or `curl http://127.0.0.1:9119/api/dashboard/plugins/rescan`).
+Then restart the dashboard, or rescan if it is already running:
 
-## Configuration
+```bash
+curl http://127.0.0.1:9119/api/dashboard/plugins/rescan
+```
+
+The **Tickets** tab appears in the dashboard navigation.
+
+## Zammad setup
+
+Ticket Deck needs a reachable Zammad instance and a Zammad API token. A read-only or least-privilege token is strongly recommended.
 
 | Env var | Required | Default | Purpose |
-|---|---|---|---|
-| `ZAMMAD_BASE_URL` | yes | — | Your Zammad base URL. **Use `https://`.** |
-| `ZAMMAD_API_TOKEN` | yes* | — | Zammad API token (read-only token recommended). |
-| `ZAMMAD_ENV_FILE` | no | `$HERMES_HOME/zammad.env` | `KEY=VALUE` file that can hold the two above. |
-| `ZAMMAD_UI_URL` | no | — | If set, shows an "Open full Zammad UI" link. |
-| `ZAMMAD_MOCK` | no | — | `1` serves canned fixtures (demo/tests); no network. |
+|---|---:|---|---|
+| `ZAMMAD_BASE_URL` | yes | — | Your Zammad base URL. Use `https://` for anything non-local. |
+| `ZAMMAD_API_TOKEN` | yes* | — | Zammad API token. Keep it server-side. |
+| `ZAMMAD_ENV_FILE` | no | `$HERMES_HOME/zammad.env` | `KEY=VALUE` file that can hold Zammad settings. |
+| `ZAMMAD_UI_URL` | no | — | If set, shows an “Open full Zammad UI” link. |
+| `ZAMMAD_MOCK` | no | — | `1` serves canned fixtures for demos/tests; no network. |
 
-\* `ZAMMAD_API_TOKEN` / `ZAMMAD_BASE_URL` may live in the env file instead of the
-process environment. Example `zammad.env`:
+\* `ZAMMAD_API_TOKEN` and `ZAMMAD_BASE_URL` may live in the env file instead of the process environment. Example `zammad.env`:
 
 ```bash
 ZAMMAD_BASE_URL=https://zammad.example.com
 ZAMMAD_API_TOKEN=your-read-only-token
 ```
 
-Create the token in Zammad under **Profile → Token Access** with the minimum
-rights needed to read tickets. Keep the env file out of version control
-(this repo's `.gitignore` already excludes `*.env`).
+Create the token in Zammad under **Profile → Token Access** with the minimum rights needed to read tickets. Keep the env file out of version control; this repo's `.gitignore` excludes `*.env` and `zammad.env`.
 
-**Try it with no Zammad:**
+Try it with no Zammad:
 
 ```bash
-ZAMMAD_MOCK=1 hermes dashboard --port 9119 --no-open
+ZAMMAD_MOCK=1 hermes dashboard --host 127.0.0.1 --port 9119 --no-open
 ```
 
-## Security & exposure
+## Features
 
-This plugin exposes ticket data over `/api/plugins/hermes-ticket-deck/*`. Those
-routes are protected by the **Hermes Dashboard auth gate**, which is
-**mandatory on any non-loopback bind in Hermes ≥ 0.18.0** and fails closed if no
-auth provider is configured. To deploy safely:
+| Area | What it does |
+|---|---|
+| Tickets tab | Adds a dashboard tab for Zammad ticket visibility |
+| Summary metrics | Open, unassigned, escalated, new, and high-priority visible counts |
+| Queues | Open-by-group breakdown; click a group to filter |
+| Presets | Open, new, pending, and high-priority views |
+| Read-only detail | Shows sanitized article text, newest last, capped by count and length |
+| Attachment handling | Counts attachments but never downloads or serves them |
+| Mock mode | Runs canned fixtures with `ZAMMAD_MOCK=1` for demos and tests |
+| Frontend | Dark-mode first, light fallback, no build step |
 
-- **Pick an auth provider** (Hermes ≥ 0.18.0):
-  - **Nous Portal OAuth** — for exposure to the public internet.
-  - **Username/password** or **self-hosted OIDC** — for trusted LAN / VPN.
-- **Never use `--insecure`** for anything reachable off the box.
-- **Don't front a loopback bind with an unauthenticated reverse proxy.** If
-  Hermes binds to `127.0.0.1`, its gate stays off; either put auth on the proxy
-  or bind non-loopback so Hermes' own gate engages.
-- **Prefer `https` for `ZAMMAD_BASE_URL`.** The token is sent in an
-  `Authorization` header on every call. This plugin **refuses to send the token
-  over `http://` to a non-local host** (localhost/tunnel endpoints are allowed).
-- **Automation / service-to-service**: use a dashboard auth provider that sets
-  `supports_token = True` and call with an authenticated bearer token.
+## API
 
-What the plugin itself guarantees:
+Mounted by Hermes at:
 
-- **Token stays server-side** — never returned to the client (`/health` reports
-  `credential_exposed_to_client: false`).
-- **Read-only** — only `GET` routes; no create/update/delete anywhere.
-- **Sanitized output** — a fixed allow-list of fields; article HTML is stripped
-  and rendered as React text nodes (no raw HTML / active content); result counts
-  and article bodies are capped.
-- **Validated input** — query filters must match a strict pattern, presets are
-  an allow-list, ticket ids are integer-bounded.
-- **No attachment downloads**, no arbitrary URL fetches, no WebSockets.
-
-> Note: the auth gate authenticates *a* user; it is not per-user authorization.
-> Any authenticated dashboard user sees every ticket the configured token can.
-> Scope the Zammad token accordingly.
-
-## API routes (mounted at `/api/plugins/hermes-ticket-deck`)
+```text
+/api/plugins/hermes-ticket-deck
+```
 
 | Method | Path | Purpose |
 |---|---|---|
-| GET | `/health` | API reachability + mode; no secrets |
+| GET | `/health` | Zammad reachability, mode, authenticated Zammad user metadata; no secrets |
 | GET | `/summary` | Capped counts and open-by-group / by-priority facets |
-| GET | `/tickets` | Sanitized ticket metadata (`preset`, `group`, `limit`) |
-| GET | `/tickets/{id}` | One ticket + sanitized article text (read-only) |
+| GET | `/tickets` | Sanitized ticket metadata; supports `preset`, `group`, and `limit` |
+| GET | `/tickets/{id}` | One ticket plus sanitized article text |
+
+Counts are intentionally capped and reflect what the configured Zammad token can see. They are dashboard visibility signals, not global reporting truth.
+
+## ⚠️ Read-only safety posture
+
+Ticket Deck is intentionally read-only.
+
+- Only `GET` routes exist.
+- There are no create, update, delete, edit, import, export, post, note, attachment-download, or dispatch routes.
+- The Zammad API token stays server-side and is never returned to the browser.
+- `/health` reports `credential_exposed_to_client: false`.
+- The backend uses a fixed allow-list of ticket and article fields.
+- Article HTML is stripped and rendered as React text nodes; raw HTML and active content are not rendered.
+- Query presets are allow-listed, group filters are validated, and ticket ids are integer-bounded.
+- Attachments are counted but not downloaded.
+- The frontend only calls its own same-origin plugin API.
+- The backend refuses to send the Zammad token over `http://` to non-local hosts. Use `https://` for live Zammad.
+
+This plugin relies on the **Hermes Dashboard auth gate** for dashboard/API protection. In Hermes Agent ≥ 0.18.0, auth is mandatory on non-loopback binds and fails closed if no auth provider is configured.
+
+Deployment guidance:
+
+- Use **Nous Portal OAuth** for internet exposure.
+- Use username/password or self-hosted OIDC for trusted LAN / VPN deployments.
+- Never use `--insecure` for anything reachable off the box.
+- Do not front a loopback Hermes bind with an unauthenticated reverse proxy. If Hermes binds to `127.0.0.1`, its own non-loopback auth gate is not engaged; either put auth on the proxy or bind non-loopback so Hermes' gate engages.
+- Scope the Zammad token deliberately. Any authenticated dashboard user sees every ticket the configured token can see.
+
+## Known limitations
+
+- This is a ticket visibility plugin, not a ticketing client.
+- Counts are capped and token-visible, not authoritative global counts.
+- There is no per-user Zammad authorization inside the plugin; authorization is the dashboard auth gate plus the configured Zammad token scope.
+- Attachments are not previewed or downloaded.
+- Article rendering is intentionally plain text after HTML stripping, not a full email/thread renderer.
+- Zammad API shape and permissions can vary by version and tenant configuration.
+- There is no built-in authentication layer beyond your Hermes dashboard deployment.
 
 ## Tests
 
@@ -153,23 +144,23 @@ What the plugin itself guarantees:
 ./tests/run_tests.sh
 ```
 
-Runs `py_compile`, `node --check` (if node is present), and a FastAPI
-`TestClient` smoke suite in **mock mode** — covering health/summary/tickets/
-detail, filter + preset + ticket-id validation, HTML stripping, output
-sanitization (no token or unexpected fields leak), and the `http`-token refusal.
+The runner auto-selects a Python interpreter that has the dashboard test dependencies. It checks `$PYTHON`, an active `$VIRTUAL_ENV`, `/opt/hermes/.venv/bin/python`, then `python3` / `python`.
 
-The runner auto-selects a Python that has the test deps: it prefers `$PYTHON`,
-then an active `$VIRTUAL_ENV`, then `/opt/hermes/.venv/bin/python`, then
-`python3`. The system `python3` usually lacks `fastapi`, so point at the venv if
-needed:
+To force the Hermes venv:
 
 ```bash
 PYTHON=/opt/hermes/.venv/bin/python ./tests/run_tests.sh
 ```
 
+The suite runs `py_compile`, `node --check` if available, and a FastAPI `TestClient` smoke test in mock mode covering health, summary, ticket list/detail, filters, presets, ticket-id validation, HTML stripping, output sanitization, no token leakage, and the non-local `http://` token refusal guard.
+
+## Discussions
+
+Questions, deployment notes, and feature requests are welcome in this repo's GitHub Discussions. Keep real ticket contents, tokens, logs, and customer data out of public discussion threads.
+
 ## Credits
 
-Built with Claude Code and Ori8, with human review before publication.
+Built by [Claude](https://claude.ai) (Anthropic) under the direction of **Ori8**, the Hermes-based AI agent at the core of [Ori8 Automations](https://github.com/ori8automations). A human provided requirements, review, and final approval.
 
 ## License
 
