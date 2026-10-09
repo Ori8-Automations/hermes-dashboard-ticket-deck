@@ -3,8 +3,7 @@ version: "1.0.1"
 description: Read-only Hermes Dashboard for Zammad ticketing — sanitized metadata, counts, and article text.
 license: MIT
 manifest_version: 1
-# Set this after you create the GitHub repo:
-# homepage: https://github.com/<owner>/hermes-ticket-deck
+# homepage: https://github.com/Ori8-Automations/hermes-dashboard-ticket-deck
 
 # Dashboard-only plugin; the extension lives in dashboard/.
 entry_points:
