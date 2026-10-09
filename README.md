@@ -22,10 +22,11 @@ Zammad REST API → Ticket Deck tab → counts · queues · read-only detail
 
 ## Install
 
-Copy the plugin directory into your Hermes plugins path, enable it, and restart the dashboard:
+Clone the repository, copy it into your Hermes plugins path under the plugin's name, enable it, and restart the dashboard. A fresh clone is named `hermes-dashboard-ticket-deck`, but the plugin is named `hermes-ticket-deck` (in `plugin.yaml` and `dashboard/manifest.json`), so the copy step installs it under that name:
 
 ```bash
-cp -r hermes-ticket-deck ~/.hermes/plugins/
+git clone https://github.com/Ori8-Automations/hermes-dashboard-ticket-deck.git
+cp -r hermes-dashboard-ticket-deck ~/.hermes/plugins/hermes-ticket-deck
 hermes plugins enable hermes-ticket-deck
 hermes dashboard --host 127.0.0.1 --port 9119 --no-open
 ```
